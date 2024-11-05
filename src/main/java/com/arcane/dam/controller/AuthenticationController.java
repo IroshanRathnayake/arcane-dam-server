@@ -14,7 +14,7 @@ public class AuthenticationController {
 
     private final UserService userService;
 
-    @GetMapping("/test")
+    @GetMapping ("/test")
     public ResponseEntity<String> login() {
         return new ResponseEntity<>("Welcome", HttpStatus.OK);
     }

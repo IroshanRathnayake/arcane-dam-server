@@ -12,11 +12,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+
 public class UserController {
 
     private final UserService userService;
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/all")
     public ResponseEntity<List<UsersDTO>> getAllUsers() {
         List<UsersDTO> users = userService.getAllUsers();

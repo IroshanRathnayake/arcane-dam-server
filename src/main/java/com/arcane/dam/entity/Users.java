@@ -30,4 +30,10 @@ public class Users {
 
     @DynamoDBAttribute(attributeName = "created_at")
     private String createdAt;
+
+    @DynamoDBAttribute(attributeName = "updated_at")
+    private String updatedAt;
+
+    @DynamoDBAttribute(attributeName = "is_enabled")
+    private Boolean isEnabled;
 }
