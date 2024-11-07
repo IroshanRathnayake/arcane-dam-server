@@ -1,5 +1,6 @@
 package com.arcane.dam.controller;
 
+import com.arcane.dam.dto.JwtResponseDTO;
 import com.arcane.dam.dto.UsersDTO;
 import com.arcane.dam.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UsersDTO user) {
+    public ResponseEntity<JwtResponseDTO> login(@RequestBody UsersDTO user) {
         return new ResponseEntity<>(userService.verify(user), HttpStatus.OK);
     }
 
     @PostMapping("/register")
     public ResponseEntity<UsersDTO> register(@RequestBody UsersDTO user) {
-        UsersDTO savedUser = userService.addUser(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.addUser(user), HttpStatus.CREATED);
     }
 }

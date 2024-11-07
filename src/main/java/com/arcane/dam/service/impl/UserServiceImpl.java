@@ -1,5 +1,6 @@
 package com.arcane.dam.service.impl;
 
+import com.arcane.dam.dto.JwtResponseDTO;
 import com.arcane.dam.dto.UsersDTO;
 import com.arcane.dam.entity.Users;
 import com.arcane.dam.repository.UserRepository;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +48,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UsersDTO addUser(UsersDTO usersDTO) {
         usersDTO.setPassword(bCryptPasswordEncoder.encode(usersDTO.getPassword()));
-        usersDTO.setCreatedAt(LocalDateTime.now().toString());
+        usersDTO.setCreatedAt(Instant.now());
+        usersDTO.setUpdatedAt(Instant.now());
+        usersDTO.setRole("user");
+        usersDTO.setIsEnabled(true);
         Users user = userRepository.save(mapper.map(usersDTO, Users.class));
         return mapper.map(user, UsersDTO.class);
     }
@@ -54,6 +59,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updateUser(String id, UsersDTO usersDTO) {
         usersDTO.setPassword(bCryptPasswordEncoder.encode(usersDTO.getPassword()));
+        usersDTO.setUpdatedAt(Instant.now());
         return userRepository.update(id, mapper.map(usersDTO, Users.class));
     }
 
@@ -63,7 +69,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String verify(UsersDTO usersDTO) {
+    public JwtResponseDTO verify(UsersDTO usersDTO) {
         Authentication authentication =
                 authManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -73,8 +79,10 @@ public class UserServiceImpl implements UserService {
                 );
 
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(usersDTO.getEmail());
+            String token = jwtService.generateToken(usersDTO.getEmail());
+            UsersDTO  user = getUserByEmail(usersDTO.getEmail());
+            return new JwtResponseDTO(token, user);
         }
-        return "Failed";
+        throw new RuntimeException("Invalid access");
     }
 }

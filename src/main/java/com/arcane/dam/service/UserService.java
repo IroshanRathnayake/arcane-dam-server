@@ -1,5 +1,6 @@
 package com.arcane.dam.service;
 
+import com.arcane.dam.dto.JwtResponseDTO;
 import com.arcane.dam.dto.UsersDTO;
 
 import java.util.List;
@@ -11,5 +12,5 @@ public interface UserService {
     UsersDTO addUser(UsersDTO usersDTO);
     boolean updateUser(String id, UsersDTO usersDTO);
     boolean deleteUser(String id);
-    String verify(UsersDTO usersDTO);
+    JwtResponseDTO verify(UsersDTO usersDTO);
 }
