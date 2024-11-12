@@ -15,15 +15,10 @@ public class WebConfig{
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
+                registry.addMapping("/api/**")
                         .allowedOrigins("*")
-                        .allowedMethods(
-                                HttpMethod.GET.name(),
-                                HttpMethod.POST.name(),
-                                HttpMethod.PUT.name(),
-                                HttpMethod.DELETE.name())
-                        .allowedHeaders("*")
-                        .allowCredentials(false);
+                        .allowedMethods("GET", "POST", "PUT", "DELETE","OPTIONS")
+                        .allowedHeaders("*");
             }
         };
     }

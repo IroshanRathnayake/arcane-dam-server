@@ -1,6 +1,7 @@
 package com.arcane.dam.controller;
 
 import com.arcane.dam.dto.UsersDTO;
+import com.arcane.dam.entity.Space;
 import com.arcane.dam.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
 @CrossOrigin
 public class UserController {
@@ -50,4 +51,18 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @PutMapping("/{userId}/spaces")
+    public ResponseEntity<UsersDTO> updateSpace(
+            @PathVariable("userId") String userId,
+            @RequestBody Space updatedSpace) {
+
+        try {
+            UsersDTO updatedUser = userService.updateSpace(userId, updatedSpace);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 }
+

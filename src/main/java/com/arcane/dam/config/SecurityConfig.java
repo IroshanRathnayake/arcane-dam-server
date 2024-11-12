@@ -27,22 +27,24 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTFilter jwtFilter;
+    private final CorsConfig corsConfig;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/login", "/register", "/test").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated())
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/{provider}")
-                        .defaultSuccessUrl("http://localhost:4200/dashboard", true))
-                .oauth2Client(Customizer.withDefaults())
+
                 .httpBasic(Customizer.withDefaults())
+//                .oauth2Login(oauth2 -> oauth2
+//                .loginPage("/oauth2/authorization/{provider}")
+//                .defaultSuccessUrl("http://localhost:4200/dashboard", true))
+//                .oauth2Client(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(cors -> cors.configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()))
+                .addFilter(corsConfig.corsFilter())
                 .build();
     }
 

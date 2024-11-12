@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 @EnableScan
 public interface UserRepo extends CrudRepository<Users, String> {
     Optional<Users> findByEmail(String email);

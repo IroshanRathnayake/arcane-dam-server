@@ -2,6 +2,7 @@ package com.arcane.dam.service.impl;
 
 import com.arcane.dam.dto.JwtResponseDTO;
 import com.arcane.dam.dto.UsersDTO;
+import com.arcane.dam.entity.Space;
 import com.arcane.dam.entity.Users;
 import com.arcane.dam.repository.UserRepository;
 import com.arcane.dam.service.UserService;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
     private final ModelMapper mapper;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -84,5 +86,11 @@ public class UserServiceImpl implements UserService {
             return new JwtResponseDTO(token, user);
         }
         throw new RuntimeException("Invalid access");
+    }
+
+    @Override
+    public UsersDTO updateSpace(String userId, Space updatedSpace) {
+        Users user = userRepository.updateSpace(userId, updatedSpace);
+        return mapper.map(user, UsersDTO.class);
     }
 }
