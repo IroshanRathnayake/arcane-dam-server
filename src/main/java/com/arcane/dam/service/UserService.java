@@ -1,6 +1,7 @@
 package com.arcane.dam.service;
 
-import com.arcane.dam.dto.JwtResponseDTO;
+import com.arcane.dam.dto.AuthRequest;
+import com.arcane.dam.dto.AuthResponseDTO;
 import com.arcane.dam.dto.UsersDTO;
 import com.arcane.dam.entity.Space;
 
@@ -13,6 +14,6 @@ public interface UserService {
     UsersDTO addUser(UsersDTO usersDTO);
     boolean updateUser(String id, UsersDTO usersDTO);
     boolean deleteUser(String id);
-    JwtResponseDTO verify(UsersDTO usersDTO);
+    AuthResponseDTO verify(AuthRequest authRequest);
     UsersDTO updateSpace(String userId, Space updatedSpace);
 }

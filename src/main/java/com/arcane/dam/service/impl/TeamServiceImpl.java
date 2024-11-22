@@ -29,7 +29,7 @@ public class TeamServiceImpl implements TeamService {
             TeamDTO teamDTO = modelMapper.map(team, TeamDTO.class);
             teamDTOs.add(teamDTO);
         }
-        return teamDTOs; 
+        return teamDTOs;
     }
 
     @Override
@@ -64,6 +64,4 @@ public class TeamServiceImpl implements TeamService {
     public TeamDTO getTeam(String id) {
         return null;
     }
-
-
 }

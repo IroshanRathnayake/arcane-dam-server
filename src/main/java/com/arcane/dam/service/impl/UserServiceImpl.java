@@ -1,9 +1,11 @@
 package com.arcane.dam.service.impl;
 
-import com.arcane.dam.dto.JwtResponseDTO;
+import com.arcane.dam.dto.AuthRequest;
+import com.arcane.dam.dto.AuthResponseDTO;
 import com.arcane.dam.dto.UsersDTO;
 import com.arcane.dam.entity.Space;
 import com.arcane.dam.entity.Users;
+import com.arcane.dam.exception.IllegalStateException;
 import com.arcane.dam.repository.UserRepository;
 import com.arcane.dam.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,21 +72,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public JwtResponseDTO verify(UsersDTO usersDTO) {
+    public AuthResponseDTO verify(AuthRequest authRequest) {
         Authentication authentication =
                 authManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
-                                usersDTO.getEmail(),
-                                usersDTO.getPassword()
+                                authRequest.getEmail(),
+                                authRequest.getPassword()
                         )
                 );
 
         if (authentication.isAuthenticated()) {
-            String token = jwtService.generateToken(usersDTO.getEmail());
-            UsersDTO  user = getUserByEmail(usersDTO.getEmail());
-            return new JwtResponseDTO(token, user);
+            String token = jwtService.generateToken(authRequest.getEmail());
+            UsersDTO  user = getUserByEmail(authRequest.getEmail());
+            return new AuthResponseDTO(token, user);
         }
-        throw new RuntimeException("Invalid access");
+        throw new IllegalStateException("Invalid access");
     }
 
     @Override
