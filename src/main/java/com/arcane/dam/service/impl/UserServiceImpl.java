@@ -2,6 +2,7 @@ package com.arcane.dam.service.impl;
 
 import com.arcane.dam.dto.AuthRequest;
 import com.arcane.dam.dto.AuthResponseDTO;
+import com.arcane.dam.dto.AuthenticatedUserData;
 import com.arcane.dam.dto.UsersDTO;
 import com.arcane.dam.entity.Space;
 import com.arcane.dam.entity.Users;
@@ -84,7 +85,17 @@ public class UserServiceImpl implements UserService {
         if (authentication.isAuthenticated()) {
             String token = jwtService.generateToken(authRequest.getEmail());
             UsersDTO  user = getUserByEmail(authRequest.getEmail());
-            return new AuthResponseDTO(token, user);
+            return new AuthResponseDTO(token, new AuthenticatedUserData(
+                    user.getId(),
+                    user.getUserName(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail(),
+                    user.getRole(),
+                    user.getSpaces(),
+                    user.getCreatedAt(),
+                    user.getIsEnabled()
+            ));
         }
         throw new IllegalStateException("Invalid access");
     }

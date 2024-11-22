@@ -1,8 +1,7 @@
-package com.arcane.dam.config;
+package com.arcane.dam.config.aws;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import lombok.RequiredArgsConstructor;
-import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,4 +1,4 @@
-package com.arcane.dam.config;
+package com.arcane.dam.config.webconfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -3,6 +3,7 @@ package com.arcane.dam.security;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.*;
 import com.arcane.dam.dto.AuthResponseDTO;
+import com.arcane.dam.dto.AuthenticatedUserData;
 import com.arcane.dam.dto.OTPVerificationRequest;
 import com.arcane.dam.dto.UsersDTO;
 import com.arcane.dam.entity.Users;
@@ -146,7 +147,17 @@ public class CognitoService {
             }
 
             Users  user = authRepository.findUserByEmail(email);
-            return new AuthResponseDTO(authResponse.getAccessToken(), mapper.map(user, UsersDTO.class));
+            return new AuthResponseDTO(authResponse.getAccessToken(), new AuthenticatedUserData(
+                    user.getId(),
+                    user.getUserName(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail(),
+                    user.getRole(),
+                    user.getSpaces(),
+                    user.getCreatedAt(),
+                    user.getIsEnabled()
+            ));
 
         } catch (NotAuthorizedException e) {
             throw new RuntimeException("Invalid credentials: " + e.getMessage(), e);

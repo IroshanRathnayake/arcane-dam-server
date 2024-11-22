@@ -1,4 +1,4 @@
-package com.arcane.dam.config;
+package com.arcane.dam.config.security;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;

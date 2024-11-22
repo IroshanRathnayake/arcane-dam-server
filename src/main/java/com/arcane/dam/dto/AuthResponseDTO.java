@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthResponseDTO {
     private String token;
-    private UsersDTO user;
+    private AuthenticatedUserData user;
 }

@@ -1,6 +1,5 @@
-package com.arcane.dam.config;
+package com.arcane.dam.config.webconfig;
 
-import com.amazonaws.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
