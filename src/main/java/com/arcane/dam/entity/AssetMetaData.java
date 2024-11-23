@@ -33,4 +33,10 @@ public class AssetMetaData {
     @DynamoDBAttribute(attributeName = "upload_timestamp")
     @DynamoDBTypeConverted(converter = InstantConverter.class)
     private Instant uploadTimestamp;
+
+    @DynamoDBAttribute(attributeName = "space_id")
+    private String spaceId;
+    @DynamoDBAttribute(attributeName = "user_id")
+    private String userId;
+
 }

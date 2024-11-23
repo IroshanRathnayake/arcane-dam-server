@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -20,6 +21,12 @@ public class Team {
 
     @DynamoDBAttribute(attributeName = "name")
     private String name;
+
+    @DynamoDBAttribute(attributeName = "description")
+    private String description;
+
+    @DynamoDBAttribute(attributeName = "tags")
+    private List<String> tags;
 
     @DynamoDBAttribute(attributeName = "created_at")
     @DynamoDBTypeConverted(converter = InstantConverter.class)

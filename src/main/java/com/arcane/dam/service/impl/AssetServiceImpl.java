@@ -1,9 +1,12 @@
 package com.arcane.dam.service.impl;
 
-import com.arcane.dam.dto.FileUploadResponse;
+import com.arcane.dam.dto.AssetResponseDTO;
 import com.arcane.dam.entity.AssetMetaData;
+import com.arcane.dam.entity.Space;
+import com.arcane.dam.entity.Users;
 import com.arcane.dam.exception.CustomException;
 import com.arcane.dam.repository.AssetRepository;
+import com.arcane.dam.repository.UserRepository;
 import com.arcane.dam.service.AssetService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +27,17 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AssetServiceImpl implements AssetService {
+    private final UserRepository userRepository;
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
@@ -54,42 +61,62 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public FileUploadResponse uploadFile(MultipartFile multipartFile) {
+    public List<AssetResponseDTO> uploadFiles(List<MultipartFile> multipartFiles, String spaceId, String userId) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String todayDate = dateTimeFormatter.format(LocalDate.now());
-        String filePath = todayDate + "/" + multipartFile.getOriginalFilename();
-        String fileId = UUID.randomUUID().toString();
 
-        try {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(filePath)
-                    .contentType(multipartFile.getContentType())
-                    .contentLength(multipartFile.getSize())
-                    .build();
+        List<AssetResponseDTO> responses = new ArrayList<>();
 
-            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(multipartFile.getInputStream(), multipartFile.getSize()));
+        for (MultipartFile multipartFile : multipartFiles) {
+            if (multipartFile.isEmpty()) {
+                throw new CustomException("File is empty", HttpStatus.BAD_REQUEST);
+            }
 
-            String fileUrl = String.format("https://%s.s3.amazonaws.com/%s", bucketName, filePath);
+            String filePath = todayDate + "/" + multipartFile.getOriginalFilename();
+            String fileId = UUID.randomUUID().toString();
 
-            // Save metadata to DynamoDB
-            AssetMetaData metadata = new AssetMetaData(
-                    fileId,
-                    multipartFile.getOriginalFilename(),
-                    multipartFile.getContentType(),
-                    multipartFile.getSize(),
-                    fileUrl,
-                    Instant.now()
-            );
-            assetRepository.save(metadata);
+            try {
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(filePath)
+                        .contentType(multipartFile.getContentType())
+                        .contentLength(multipartFile.getSize())
+                        .build();
 
-            return mapper.map(metadata, FileUploadResponse.class);
+                s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(multipartFile.getInputStream(), multipartFile.getSize()));
 
-        } catch (IOException e) {
-            log.error("Error occurred ==> {}", e.getMessage());
-            throw new CustomException("Error occurred in file upload: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+                String fileUrl = String.format("https://%s.s3.amazonaws.com/%s", bucketName, filePath);
+
+                Users user = userRepository.getUsersById(userId);
+                if (user == null) {
+                    throw new CustomException("User not found", HttpStatus.NOT_FOUND);
+                }
+
+                // Save metadata to DynamoDB
+                AssetMetaData metadata = new AssetMetaData(
+                        fileId,
+                        multipartFile.getOriginalFilename(),
+                        multipartFile.getContentType(),
+                        multipartFile.getSize(),
+                        fileUrl,
+                        Instant.now(),
+                        spaceId,
+                        user.getId()
+                );
+                assetRepository.save(metadata);
+
+                AssetResponseDTO response = mapper.map(metadata, AssetResponseDTO.class);
+                responses.add(response);
+
+            } catch (IOException e) {
+                log.error("Error occurred ==> {}", e.getMessage());
+                throw new CustomException("Error occurred in file upload: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+
+        return responses;
     }
+
 
     @Override
     public byte[] downloadFile(String fileId) {
@@ -119,7 +146,7 @@ public class AssetServiceImpl implements AssetService {
 
 
     @Override
-    public FileUploadResponse updateFile(String fileId, MultipartFile multipartFile) {
+    public AssetResponseDTO updateFile(String fileId, MultipartFile multipartFile) {
         AssetMetaData assetMetaData = assetRepository.findById(fileId)
                 .orElseThrow(() -> new CustomException("File not found", HttpStatus.NOT_FOUND));
 
@@ -146,7 +173,7 @@ public class AssetServiceImpl implements AssetService {
             assetMetaData.setUploadTimestamp(Instant.now());
 
             if(assetRepository.update(assetMetaData.getId(),assetMetaData)){
-                return mapper.map(assetMetaData, FileUploadResponse.class);
+                return mapper.map(assetMetaData, AssetResponseDTO.class);
             }
 
         } catch (IOException e) {
@@ -176,4 +203,22 @@ public class AssetServiceImpl implements AssetService {
             throw new CustomException("Error occurred while deleting the file: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @Override
+    public List<AssetResponseDTO> getAssetsBySpaceId(String spaceId) {
+        if (spaceId == null || spaceId.isEmpty()) {
+            throw new CustomException("Space ID cannot be null or empty", HttpStatus.BAD_REQUEST);
+        }
+        List<AssetMetaData> assets = assetRepository.findBySpaceId(spaceId);
+
+        if (assets == null || assets.isEmpty()) {
+            throw new CustomException("No assets found for the provided Space ID", HttpStatus.NOT_FOUND);
+        }
+
+        return assets.stream()
+                .map(metaData -> mapper.map(metaData, AssetResponseDTO.class))
+                .collect(Collectors.toList());
+
+    }
+
 }

@@ -1,12 +1,11 @@
 package com.arcane.dam.service.impl;
 
-import com.arcane.dam.dto.AuthRequest;
-import com.arcane.dam.dto.AuthResponseDTO;
-import com.arcane.dam.dto.AuthenticatedUserData;
-import com.arcane.dam.dto.UsersDTO;
+import com.arcane.dam.dto.*;
 import com.arcane.dam.entity.Space;
+import com.arcane.dam.entity.Team;
 import com.arcane.dam.entity.Users;
 import com.arcane.dam.exception.IllegalStateException;
+import com.arcane.dam.repository.TeamRepository;
 import com.arcane.dam.repository.UserRepository;
 import com.arcane.dam.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
     private final ModelMapper mapper;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final AuthenticationManager authManager;
@@ -102,6 +102,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UsersDTO updateSpace(String userId, Space updatedSpace) {
+        Team team = mapper.map(new TeamDTO(
+                updatedSpace.getId(),
+                updatedSpace.getName(),
+                updatedSpace.getDescription(),
+                updatedSpace.getTags(),
+                Instant.now(),
+                Instant.now(),
+                true
+        ),  Team.class);
+        teamRepository.save(team);
         Users user = userRepository.updateSpace(userId, updatedSpace);
         return mapper.map(user, UsersDTO.class);
     }
