@@ -41,7 +41,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<UsersDTO> register(@RequestBody UsersDTO user) {
-        return new ResponseEntity<>(cognitoService.registerUser(user.getUserName(), user.getEmail(), user.getPassword()), HttpStatus.CREATED);
+        return new ResponseEntity<>(cognitoService.registerUser(user), HttpStatus.CREATED);
     }
 
     @PostMapping("/verify")

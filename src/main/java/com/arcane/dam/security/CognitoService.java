@@ -40,29 +40,24 @@ public class CognitoService {
     private final AuthRepository authRepository;
     private final ModelMapper mapper;
 
-    public UsersDTO registerUser(String username, String email, String password) {
+    public UsersDTO registerUser(UsersDTO usersDTO) {
         try {
 
-            String secretHash = generateSecretHash(clientId, clientSecret, email);
+            String secretHash = generateSecretHash(clientId, clientSecret, usersDTO.getEmail());
 
             // Create the SignUpRequest
             SignUpRequest signUpRequest = new SignUpRequest()
                     .withClientId(clientId)
-                    .withUsername(username)
-                    .withPassword(password)
+                    .withUsername(usersDTO.getEmail())
+                    .withPassword(usersDTO.getPassword())
                     .withUserAttributes(
-                            new AttributeType().withName("email").withValue(email)
+                            new AttributeType().withName("email").withValue(usersDTO.getEmail())
                     )
                     .withSecretHash(secretHash);
 
             cognitoIdentityProvider.signUp(signUpRequest);
 
-            //Save User in Database
-            Users registeredUser = new Users();
-            registeredUser.setUserName(username);
-            registeredUser.setEmail(email);
-            registeredUser.setPassword(password);
-
+            Users registeredUser = mapper.map(usersDTO, Users.class);
             return mapper.map(userRepository.save(registeredUser), UsersDTO.class);
 
         } catch (Exception e) {

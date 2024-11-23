@@ -51,6 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UsersDTO addUser(UsersDTO usersDTO) {
+        usersDTO.setUserName(usersDTO.getEmail());
         usersDTO.setPassword(bCryptPasswordEncoder.encode(usersDTO.getPassword()));
         usersDTO.setCreatedAt(Instant.now());
         usersDTO.setUpdatedAt(Instant.now());
